@@ -16,9 +16,43 @@
 #
 import webapp2
 
+form = """
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+
+	<title> The NOOB Blog! </title>
+	
+</head>
+	
+<body>
+
+	<h2> The NOOB Blog! </h2>
+	
+	<form method="post">
+		<label>
+			<div>title</div>
+			<input type="text" name="blog_title">
+		</label>
+		
+		<label>
+			<div>Comment</div>
+			<textarea name="blog_body"></textarea>
+		</label>
+		<br>
+		<input type="submit"/>
+	
+	
+</body>
+
+</html>
+"""
+
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello blog!')
+        self.response.write(form)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
