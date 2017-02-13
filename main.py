@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
 
 form = """
 <!DOCTYPE HTML>
@@ -24,36 +25,82 @@ form = """
 <head>
 
 	<title> The NOOB Blog! </title>
-	
+
 </head>
-	
+
 <body>
 
 	<h2> The NOOB Blog! </h2>
-	
+
 	<form method="post">
+
 		<label>
-			<div>title</div>
+			<div> Blog Title </div>
 			<input type="text" name="blog_title">
 		</label>
-		
+
 		<label>
-			<div>Comment</div>
+			<div>Blog Body</div>
 			<textarea name="blog_body"></textarea>
 		</label>
-		<br>
+
+		<div class="error" style="color: red">%(error)s</div>
+
 		<input type="submit"/>
-	
-	
+
+	</form>
+
 </body>
 
 </html>
+
 """
 
+def has_blog_title(blog_title):
+	if len(str(blog_title)) != 0:
+		return True
+	return False
+
+def has_blog_body(blog_body):
+	if len(str(blog_body)) != 0:
+		return True
+	return False
+
 class MainHandler(webapp2.RequestHandler):
-    def get(self):
-        self.response.write(form)
+
+	def write_form(self, blog_title="", blog_body="", error=""):
+		self.response.write(form % {
+									"blog_title" : blog_title,
+									"blog_body" : blog_body,
+									"error" : error
+
+									})
+
+	def get(self):
+		self.write_form()
+
+	def post(self):
+		blog_title = self.request.get("blog_title")
+		blog_body = self.request.get("blog_body")
+
+		has_title = has_blog_title(blog_title)
+		has_body = has_blog_body(blog_body)
+
+		if has_title and has_body:
+			self.response.write("Thanks for submitting!
+								Your comment has been posted below.")
+
+		elif has_title and not has_body:
+			self.write_form(blog_title, "", "Submission has a title but no body!")
+		elif has_body and not has_title:
+			self.write_form("", blog_body, "Submission has a body but no title!")
+		else:
+			self.write_form("", "", "Submission requires a title and body!")
+class HomeHandler(webapp2.RequestHandler):
+	def get(self):
+		self.response.write("You're home!")
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+	('/Home', HomeHandler)
 ], debug=True)
