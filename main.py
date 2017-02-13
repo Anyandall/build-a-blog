@@ -55,6 +55,8 @@ form = """
 
 <hr>
 
+	<div>%(submission)s</div>
+
 </body>
 
 </html>
@@ -83,7 +85,7 @@ class MainHandler(webapp2.RequestHandler):
 	def write_new_form(self, accepted="", blog_title="", blog_body="", error=""):
 		pass
 
-	def write_form(self, accepted="", blog_title="", blog_body="", error=""):
+	def write_form(self, accepted="", blog_title="", blog_body="", error="", submission=""):
 	#	all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC")
 	#	samus_post = db.GqlQuery("SELECT * FROM Submission WHERE sub_title = 'samus'")
 
@@ -91,7 +93,8 @@ class MainHandler(webapp2.RequestHandler):
 									"accepted" : accepted,
 									"blog_title" : blog_title,
 									"blog_body" : blog_body,
-									"error" : error
+									"error" : error,
+									"submission" : submission
 									})
 
 #	def write_home(self):
@@ -100,8 +103,14 @@ class MainHandler(webapp2.RequestHandler):
 #		self.response.write(accepted)
 #		self.write_form("", "", "", all_posts)
 
+
+
 	def get(self):
 		self.write_form()
+		self.query = Submission.all()
+		for self.submission in self.query:
+			self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+
 
 	def post(self):
 		blog_title = self.request.get("blog_title")
@@ -119,7 +128,9 @@ class MainHandler(webapp2.RequestHandler):
 			submission.put()
 
 			#self.write_form(accepted, "", "", "", all_posts)
-			self.write_form(accepted)
+			self.redirect("/")
+
+			#self.response.write(submission)
 
 		elif has_title and not has_body:
 			self.write_form("", blog_title, "", "Submission has a title but no body!")
