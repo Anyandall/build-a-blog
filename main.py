@@ -36,12 +36,12 @@ form = """
 
 		<label>
 			<div> Blog Title </div>
-			<input type="text" name="blog_title">
+			<input type="text" name="blog_title" value="%(blog_title)s">
 		</label>
 
 		<label>
 			<div>Blog Body</div>
-			<textarea name="blog_body"></textarea>
+			<textarea name="blog_body">%(blog_body)s</textarea>
 		</label>
 
 		<div class="error" style="color: red">%(error)s</div>
@@ -73,7 +73,6 @@ class MainHandler(webapp2.RequestHandler):
 									"blog_title" : blog_title,
 									"blog_body" : blog_body,
 									"error" : error
-
 									})
 
 	def get(self):
@@ -87,8 +86,7 @@ class MainHandler(webapp2.RequestHandler):
 		has_body = has_blog_body(blog_body)
 
 		if has_title and has_body:
-			self.response.write("Thanks for submitting!
-								Your comment has been posted below.")
+			self.response.write("Thanks for submitting! Your comment has been posted below.")
 
 		elif has_title and not has_body:
 			self.write_form(blog_title, "", "Submission has a title but no body!")
