@@ -20,6 +20,8 @@ import string
 
 from google.appengine.ext import db
 
+
+
 form = """
 <!DOCTYPE HTML>
 
@@ -55,7 +57,7 @@ form = """
 
 <hr>
 
-	<div>%(submission)s</div>
+	<div></div>
 
 </body>
 
@@ -85,7 +87,7 @@ class MainHandler(webapp2.RequestHandler):
 	def write_new_form(self, accepted="", blog_title="", blog_body="", error=""):
 		pass
 
-	def write_form(self, accepted="", blog_title="", blog_body="", error="", submission=""):
+	def write_form(self, accepted="", blog_title="", blog_body="", error="", all_posts=""):
 	#	all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC")
 	#	samus_post = db.GqlQuery("SELECT * FROM Submission WHERE sub_title = 'samus'")
 
@@ -93,8 +95,7 @@ class MainHandler(webapp2.RequestHandler):
 									"accepted" : accepted,
 									"blog_title" : blog_title,
 									"blog_body" : blog_body,
-									"error" : error,
-									"submission" : submission
+									"error" : error
 									})
 
 #	def write_home(self):
@@ -107,9 +108,9 @@ class MainHandler(webapp2.RequestHandler):
 
 	def get(self):
 		self.write_form()
-		self.query = Submission.all()
-		for self.submission in self.query:
-			self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+#		self.query = Submission.all()
+	#	for self.submission in self.query:
+		#	self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
 
 
 	def post(self):
@@ -120,15 +121,21 @@ class MainHandler(webapp2.RequestHandler):
 		has_body = has_blog_body(blog_body)
 
 		accepted = "Thanks for submitting! Your post can be viewed below the form."
-
+	#	all_posts = db.GqlQuery("SELECT * FROM Submission")
 
 		if has_title and has_body:
 			#self.response.write("Thanks for submitting! Your comment has been posted below.")
 			submission = Submission(blog_title = blog_title, blog_body = blog_body)
 			submission.put()
 
-			#self.write_form(accepted, "", "", "", all_posts)
-			self.redirect("/")
+			self.write_form(accepted)
+			self.query = Submission.all()
+			for self.submission in self.query:
+				self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+
+
+			#self.response.write(all_posts)
+			#self.redirect("/")
 
 			#self.response.write(submission)
 
