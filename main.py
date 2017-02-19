@@ -57,7 +57,7 @@ form = """
 
 <hr>
 
-	<div></div>
+	<div><h3> Previous posts </h3></div>
 
 </body>
 
@@ -87,7 +87,7 @@ class MainHandler(webapp2.RequestHandler):
 	def write_new_form(self, accepted="", blog_title="", blog_body="", error=""):
 		pass
 
-	def write_form(self, accepted="", blog_title="", blog_body="", error="", all_posts=""):
+	def write_form(self, accepted="", blog_title="", blog_body="", error=""):
 	#	all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC")
 	#	samus_post = db.GqlQuery("SELECT * FROM Submission WHERE sub_title = 'samus'")
 
@@ -107,7 +107,8 @@ class MainHandler(webapp2.RequestHandler):
 
 
 	def get(self):
-		self.write_form()
+		self.redirect("/newpost")
+	#	self.write_form()
 #		self.query = Submission.all()
 	#	for self.submission in self.query:
 		#	self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
@@ -128,7 +129,8 @@ class MainHandler(webapp2.RequestHandler):
 			submission = Submission(blog_title = blog_title, blog_body = blog_body)
 			submission.put()
 
-			self.write_form(accepted)
+			#self.write_form(accepted)
+			self.redirect('/')
 			self.query = Submission.all()
 			for self.submission in self.query:
 				self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
@@ -146,19 +148,72 @@ class MainHandler(webapp2.RequestHandler):
 		else:
 			self.write_form("", "", "", "Submission requires a title and body!")
 
-class HomeHandler(webapp2.RequestHandler):
+class NewPostHandler(MainHandler):
 
-	def write_home(self):
-		submissions = db.GqlQuery("SELECT * FROM Submission "
-								  "ORDER BY created DESC ")
-		accepted = "Thanks for submitting! Your post can be viewed below the form."
-
-		self.response.write(accepted + form + submissions)
+	def write_newpost(self, accepted="", blog_title="", blog_body="", error=""):
+		self.response.write(form % {
+									"accepted" : accepted,
+									"blog_title" : blog_title,
+									"blog_body" : blog_body,
+									"error" : error
+									})
 
 	def get(self):
-		self.write_home()
+		self.write_newpost()
+
+	def post(self):
+		blog_title = self.request.get("blog_title")
+		blog_body = self.request.get("blog_body")
+		has_title = has_blog_title(blog_title)
+		has_body = has_blog_body(blog_body)
+
+		accepted = "Thanks for submitting! Your post can be viewed below the form."
+		#	all_posts = db.GqlQuery("SELECT * FROM Submission")
+
+		if has_title and has_body:
+				#self.response.write("Thanks for submitting! Your comment has been posted below.")
+			submission = Submission(blog_title = blog_title, blog_body = blog_body)
+			submission.put()
+
+				#self.write_form(accepted)
+				#self.redirect('/')
+				#self.query = Submission.all()
+				#for self.submission in self.query:
+				#	self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+
+
+			self.redirect("/blog")
+		elif has_title and not has_body:
+			self.write_form("", blog_title, "", "Submission has a title but no body!")
+		elif has_body and not has_title:
+			self.write_form("", "", blog_body, "Submission has a body but no title!")
+		else:
+			self.write_form("", "", "", "Submission requires a title and body!")
+
+class BlogHandler(NewPostHandler):
+
+	def write_blog(self, accepted="", blog_title="", blog_body="", error=""):
+#		submissions = str(db.GqlQuery("SELECT * FROM Submission "
+#								  "ORDER BY created DESC "))
+#		accepted = "Thanks for submitting! Your post can be viewed below the form."
+
+		self.response.write(form % {
+									"accepted" : accepted,
+									"blog_title" : blog_title,
+									"blog_body" : blog_body,
+									"error" : error
+									})
+
+	def get(self):
+		accepted = "Thanks for submitting! Your post can be viewed below the form."
+		self.write_blog()
+		self.query = Submission.gql("ORDER BY created DESC LIMIT 5")
+		for self.submission in self.query:
+			self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-	('/Home', HomeHandler)
+	('/blog', BlogHandler),
+	('/newpost', NewPostHandler)
 ], debug=True)
