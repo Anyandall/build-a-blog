@@ -70,7 +70,6 @@ post = """
 <html>
 </body>
 	<h1>%(blog_title)s</h1>
-	<br>
 	<p>%(blog_body)s</p>
 </body>
 </html>
@@ -238,10 +237,10 @@ class BlogHandler(NewPostHandler):
 #		self.write_blog()
 	#	all_posts = Submission.gql("ORDER BY created DESC LIMIT 5")
 		all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC LIMIT 5")
-		for submission in all_posts:
-			self.response.write("<a href='/blog/%s'>%s</a><p>%s</p>" % (submission.key().id(), submission.blog_title, submission.blog_body))
+		for post in all_posts:
+			self.response.write("<a href='/blog/%s'>%s</a><p>%s</p>" % (post.key().id(), post.blog_title, post.blog_body))
 
-class ViewPostHandler(webapp2.RequestHandler):
+class ViewPostHandler(BlogHandler):
 
 	def summon_post(self, blog_title="", blog_body=""):
 		self.response.write(post % {
@@ -253,13 +252,19 @@ class ViewPostHandler(webapp2.RequestHandler):
 	def get(self, id):
 	#	blog_title = self.request.get("blog_title")
 	#	blog_body = self.request.get("blog_body")
-#		id_query = db.GqlQuery("SELECT * FROM Submission WHERE id = %s" % (id))
+		blog_entry = Submission.get_by_id(int(id))
+		blog_title = blog_entry.blog_title
+		blog_body = blog_entry.blog_body
+	#	id_query = db.GqlQuery("SELECT * FROM Submission WHERE id = %s" % (id))
 	#	id_query = Submission.gql(WHERE id = id)
 	#    for record in id_query:
 	#		title = (record.blog_title())
-	#		self.response.write("<p>%s</p>" % (title))
+	#		self.response.write("<p>%s</p><p>%s</p>" % (record.blog_title, record.blog_body))
 	#		self.summon_post(blog_title, blog_body)
-		self.response.write(post)
+	#	self.summon_post("Blog Title", "Blog Body")
+	#	self.response.write(id)
+	#	self.summon_post("Blog Title","Blog Body")
+		self.summon_post(blog_title, blog_body)
 
 
 
