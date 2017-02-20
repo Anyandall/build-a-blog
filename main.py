@@ -227,11 +227,17 @@ class BlogHandler(NewPostHandler):
 	#	all_posts = Submission.gql("ORDER BY created DESC LIMIT 5")
 		all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC LIMIT 5")
 		for submission in all_posts:
-			self.response.write("<a href="">%s</a><p>%s</p><p>%s</p>" % (submission.blog_title, submission.blog_body, submission.key().id()))
+			self.response.write("<a href='/blog?post_id=%s'>%s</a><p>%s</p>" % (submission.key().id(), submission.blog_title, submission.blog_body))
+
+class ViewPostHandler(webapp2.RequestHandler):
+	def get(self, id):
+		post_id = self.request.get(submission.key().id())
+		self.response.write(post_id)
 
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
 	('/blog', BlogHandler),
-	('/newpost', NewPostHandler)
+	('/newpost', NewPostHandler),
+	webapp2.Route('/blog/<id>:\d+>', ViewPostHandler)
 ], debug=True)
