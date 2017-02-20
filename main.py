@@ -57,7 +57,7 @@ form = """
 
 <hr>
 
-	<div><h3> Previous posts </h3></div>
+	<div><h3>%(previous)s</h3></div>
 
 </body>
 
@@ -65,12 +65,12 @@ form = """
 
 """
 
-def has_blog_title(blog_title):
+def user_has_blog_title(blog_title):
 	if len(str(blog_title)) != 0:
 		return True
 	return False
 
-def has_blog_body(blog_body):
+def user_has_blog_body(blog_body):
 	if len(str(blog_body)) != 0:
 		return True
 	return False
@@ -87,7 +87,7 @@ class MainHandler(webapp2.RequestHandler):
 	def write_new_form(self, accepted="", blog_title="", blog_body="", error=""):
 		pass
 
-	def write_form(self, accepted="", blog_title="", blog_body="", error=""):
+	def write_form(self, accepted="", blog_title="", blog_body="", error="", previous=""):
 	#	all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC")
 	#	samus_post = db.GqlQuery("SELECT * FROM Submission WHERE sub_title = 'samus'")
 
@@ -95,7 +95,8 @@ class MainHandler(webapp2.RequestHandler):
 									"accepted" : accepted,
 									"blog_title" : blog_title,
 									"blog_body" : blog_body,
-									"error" : error
+									"error" : error,
+									"previous" : "previous"
 									})
 
 #	def write_home(self):
@@ -118,8 +119,8 @@ class MainHandler(webapp2.RequestHandler):
 		blog_title = self.request.get("blog_title")
 		blog_body = self.request.get("blog_body")
 
-		has_title = has_blog_title(blog_title)
-		has_body = has_blog_body(blog_body)
+		has_title = user_has_blog_title(blog_title)
+		has_body = user_user_has_blog_body(blog_body)
 
 		accepted = "Thanks for submitting! Your post can be viewed below the form."
 	#	all_posts = db.GqlQuery("SELECT * FROM Submission")
@@ -150,22 +151,24 @@ class MainHandler(webapp2.RequestHandler):
 
 class NewPostHandler(MainHandler):
 
-	def write_newpost(self, accepted="", blog_title="", blog_body="", error=""):
+	def write_newpost(self, accepted="", blog_title="", blog_body="", error="", previous=""):
 		self.response.write(form % {
 									"accepted" : accepted,
 									"blog_title" : blog_title,
 									"blog_body" : blog_body,
-									"error" : error
+									"error" : error,
+									"previous" : previous
 									})
 
 	def get(self):
+		previous = "<h3> Previous Posts </h3>"
 		self.write_newpost()
 
 	def post(self):
 		blog_title = self.request.get("blog_title")
 		blog_body = self.request.get("blog_body")
-		has_title = has_blog_title(blog_title)
-		has_body = has_blog_body(blog_body)
+		has_title = user_has_blog_title(blog_title)
+		has_body = user_has_blog_body(blog_body)
 
 		accepted = "Thanks for submitting! Your post can be viewed below the form."
 		#	all_posts = db.GqlQuery("SELECT * FROM Submission")
@@ -184,15 +187,15 @@ class NewPostHandler(MainHandler):
 
 			self.redirect("/blog")
 		elif has_title and not has_body:
-			self.write_form("", blog_title, "", "Submission has a title but no body!")
+			self.write_newpost("", blog_title, "", "Submission has a title but no body!")
 		elif has_body and not has_title:
-			self.write_form("", "", blog_body, "Submission has a body but no title!")
+			self.write_newpost("", "", blog_body, "Submission has a body but no title!")
 		else:
-			self.write_form("", "", "", "Submission requires a title and body!")
+			self.write_newpost("", "", "", "Submission requires a title and body!")
 
 class BlogHandler(NewPostHandler):
 
-	def write_blog(self, accepted="", blog_title="", blog_body="", error=""):
+	def write_blog(self, accepted="", blog_title="", blog_body="", error="", previous=""):
 #		submissions = str(db.GqlQuery("SELECT * FROM Submission "
 #								  "ORDER BY created DESC "))
 #		accepted = "Thanks for submitting! Your post can be viewed below the form."
@@ -201,15 +204,30 @@ class BlogHandler(NewPostHandler):
 									"accepted" : accepted,
 									"blog_title" : blog_title,
 									"blog_body" : blog_body,
-									"error" : error
+									"error" : error,
+									"previous" : previous
 									})
 
 	def get(self):
-		accepted = "Thanks for submitting! Your post can be viewed below the form."
-		self.write_blog()
-		self.query = Submission.gql("ORDER BY created DESC LIMIT 5")
-		for self.submission in self.query:
-			self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+		accepted = "Thanks for submitting! Please refresh the page to view your submission below."
+
+		blog_title = self.request.get("blog_title")
+		blog_body = self.request.get("blog_body")
+		#has_title = user_has_blog_title(blog_title)
+		#has_body = user_has_blog_body(blog_body)
+
+
+		#if has_title and has_body:
+		self.response.write(accepted + "<hr><br>")
+			#self.write_blog()
+		#else:
+			#self.write_blog()
+
+#		self.write_blog()
+	#	all_posts = Submission.gql("ORDER BY created DESC LIMIT 5")
+		all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC LIMIT 5")
+		for submission in all_posts:
+			self.response.write("<a href="">%s</a><p>%s</p><p>%s</p>" % (submission.blog_title, submission.blog_body, submission.key().id()))
 
 
 app = webapp2.WSGIApplication([
