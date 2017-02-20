@@ -65,6 +65,17 @@ form = """
 
 """
 
+post = """
+<!DOCTYPE HTML>
+<html>
+</body>
+	<h1>%(blog_title)s</h1>
+	<br>
+	<p>%(blog_body)s</p>
+</body>
+</html>
+"""
+
 def user_has_blog_title(blog_title):
 	if len(str(blog_title)) != 0:
 		return True
@@ -213,6 +224,7 @@ class BlogHandler(NewPostHandler):
 
 		blog_title = self.request.get("blog_title")
 		blog_body = self.request.get("blog_body")
+
 		#has_title = user_has_blog_title(blog_title)
 		#has_body = user_has_blog_body(blog_body)
 
@@ -227,17 +239,34 @@ class BlogHandler(NewPostHandler):
 	#	all_posts = Submission.gql("ORDER BY created DESC LIMIT 5")
 		all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC LIMIT 5")
 		for submission in all_posts:
-			self.response.write("<a href='/blog?post_id=%s'>%s</a><p>%s</p>" % (submission.key().id(), submission.blog_title, submission.blog_body))
+			self.response.write("<a href='/blog/%s'>%s</a><p>%s</p>" % (submission.key().id(), submission.blog_title, submission.blog_body))
 
 class ViewPostHandler(webapp2.RequestHandler):
+
+	def summon_post(self, blog_title="", blog_body=""):
+		self.response.write(post % {
+									"blog_title" : blog_title,
+									"blog_body" : blog_body
+									})
+
+
 	def get(self, id):
-		post_id = self.request.get(submission.key().id())
-		self.response.write(post_id)
+	#	blog_title = self.request.get("blog_title")
+	#	blog_body = self.request.get("blog_body")
+#		id_query = db.GqlQuery("SELECT * FROM Submission WHERE id = %s" % (id))
+	#	id_query = Submission.gql(WHERE id = id)
+	#    for record in id_query:
+	#		title = (record.blog_title())
+	#		self.response.write("<p>%s</p>" % (title))
+	#		self.summon_post(blog_title, blog_body)
+		self.response.write(post)
+
+
 
 
 app = webapp2.WSGIApplication([
+	webapp2.Route('/blog/<id:\d+>', ViewPostHandler),
     ('/', MainHandler),
 	('/blog', BlogHandler),
-	('/newpost', NewPostHandler),
-	webapp2.Route('/blog/<id>:\d+>', ViewPostHandler)
+	('/newpost', NewPostHandler)
 ], debug=True)

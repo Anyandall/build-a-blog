@@ -15,3 +15,9 @@ indexes:
   - name: created
     direction: desc
   - name: blog_title
+
+- kind: Submission
+  properties:
+  - name: id
+  - name: blog_body
+  - name: blog_title
