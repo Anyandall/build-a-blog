@@ -75,6 +75,11 @@ post = """
 </html>
 """
 
+home = """
+<h4><a href="/blog"> Home </a>
+<h4><a href="/newpost"> New Post </a>
+"""
+
 def user_has_blog_title(blog_title):
 	if len(str(blog_title)) != 0:
 		return True
@@ -187,11 +192,12 @@ class BlogHandler(NewPostHandler):
 		blog_title = self.request.get("blog_title")
 		blog_body = self.request.get("blog_body")
 
-		self.response.write(accepted + "<hr><br>")
+		self.response.write("Previous Posts" + "<hr>")
 
 		all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC LIMIT 5")
 		for post in all_posts:
 			self.response.write("<a href='/blog/%s'>%s</a><p>%s</p>" % (post.key().id(), post.blog_title, post.blog_body))
+		self.response.write(home)
 
 class ViewPostHandler(BlogHandler):
 
@@ -209,6 +215,7 @@ class ViewPostHandler(BlogHandler):
 		blog_body = blog_entry.blog_body
 
 		self.summon_post(blog_title, blog_body)
+		self.response.write(home)
 
 
 
