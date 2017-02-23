@@ -94,12 +94,7 @@ class Submission(db.Model):
 
 class MainHandler(webapp2.RequestHandler):
 
-	def write_new_form(self, accepted="", blog_title="", blog_body="", error=""):
-		pass
-
 	def write_form(self, accepted="", blog_title="", blog_body="", error="", previous=""):
-	#	all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC")
-	#	samus_post = db.GqlQuery("SELECT * FROM Submission WHERE sub_title = 'samus'")
 
 		self.response.write(form % {
 									"accepted" : accepted,
@@ -109,55 +104,34 @@ class MainHandler(webapp2.RequestHandler):
 									"previous" : "previous"
 									})
 
-#	def write_home(self):
-#		accepted = "Thanks for submitting! Your post can be viewed below the form."
-
-#		self.response.write(accepted)
-#		self.write_form("", "", "", all_posts)
-
-
-
 	def get(self):
 		self.redirect("/newpost")
-	#	self.write_form()
-#		self.query = Submission.all()
-	#	for self.submission in self.query:
-		#	self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+
+#	def post(self):
+#		blog_title = self.request.get("blog_title")
+#		blog_body = self.request.get("blog_body")
+
+#		has_title = user_has_blog_title(blog_title)
+#		has_body = user_user_has_blog_body(blog_body)
+
+#		accepted = "Thanks for submitting! Your post can be viewed below the form."
+
+#		if has_title and has_body:
+#			submission = Submission(blog_title = blog_title, blog_body = blog_body)
+#			submission.put()
 
 
-	def post(self):
-		blog_title = self.request.get("blog_title")
-		blog_body = self.request.get("blog_body")
+#			self.query = Submission.all()
+#			for self.submission in self.query:
+#				self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
+#				self.redirect('/')
 
-		has_title = user_has_blog_title(blog_title)
-		has_body = user_user_has_blog_body(blog_body)
-
-		accepted = "Thanks for submitting! Your post can be viewed below the form."
-	#	all_posts = db.GqlQuery("SELECT * FROM Submission")
-
-		if has_title and has_body:
-			#self.response.write("Thanks for submitting! Your comment has been posted below.")
-			submission = Submission(blog_title = blog_title, blog_body = blog_body)
-			submission.put()
-
-			#self.write_form(accepted)
-			self.redirect('/')
-			self.query = Submission.all()
-			for self.submission in self.query:
-				self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
-
-
-			#self.response.write(all_posts)
-			#self.redirect("/")
-
-			#self.response.write(submission)
-
-		elif has_title and not has_body:
-			self.write_form("", blog_title, "", "Submission has a title but no body!")
-		elif has_body and not has_title:
-			self.write_form("", "", blog_body, "Submission has a body but no title!")
-		else:
-			self.write_form("", "", "", "Submission requires a title and body!")
+#		elif has_title and not has_body:
+#			self.write_form("", blog_title, "", "Submission has a title but no body!")
+#		elif has_body and not has_title:
+#			self.write_form("", "", blog_body, "Submission has a body but no title!")
+#		else:
+#			self.write_form("", "", "", "Submission requires a title and body!")
 
 class NewPostHandler(MainHandler):
 
@@ -181,19 +155,11 @@ class NewPostHandler(MainHandler):
 		has_body = user_has_blog_body(blog_body)
 
 		accepted = "Thanks for submitting! Your post can be viewed below the form."
-		#	all_posts = db.GqlQuery("SELECT * FROM Submission")
 
 		if has_title and has_body:
-				#self.response.write("Thanks for submitting! Your comment has been posted below.")
+
 			submission = Submission(blog_title = blog_title, blog_body = blog_body)
 			submission.put()
-
-				#self.write_form(accepted)
-				#self.redirect('/')
-				#self.query = Submission.all()
-				#for self.submission in self.query:
-				#	self.response.write("<p>%s</p><p>%s</p>" % (self.submission.blog_title, self.submission.blog_body))
-
 
 			self.redirect("/blog")
 		elif has_title and not has_body:
@@ -206,9 +172,6 @@ class NewPostHandler(MainHandler):
 class BlogHandler(NewPostHandler):
 
 	def write_blog(self, accepted="", blog_title="", blog_body="", error="", previous=""):
-#		submissions = str(db.GqlQuery("SELECT * FROM Submission "
-#								  "ORDER BY created DESC "))
-#		accepted = "Thanks for submitting! Your post can be viewed below the form."
 
 		self.response.write(form % {
 									"accepted" : accepted,
@@ -224,18 +187,8 @@ class BlogHandler(NewPostHandler):
 		blog_title = self.request.get("blog_title")
 		blog_body = self.request.get("blog_body")
 
-		#has_title = user_has_blog_title(blog_title)
-		#has_body = user_has_blog_body(blog_body)
-
-
-		#if has_title and has_body:
 		self.response.write(accepted + "<hr><br>")
-			#self.write_blog()
-		#else:
-			#self.write_blog()
 
-#		self.write_blog()
-	#	all_posts = Submission.gql("ORDER BY created DESC LIMIT 5")
 		all_posts = db.GqlQuery("SELECT * FROM Submission ORDER BY created DESC LIMIT 5")
 		for post in all_posts:
 			self.response.write("<a href='/blog/%s'>%s</a><p>%s</p>" % (post.key().id(), post.blog_title, post.blog_body))
@@ -250,20 +203,11 @@ class ViewPostHandler(BlogHandler):
 
 
 	def get(self, id):
-	#	blog_title = self.request.get("blog_title")
-	#	blog_body = self.request.get("blog_body")
+
 		blog_entry = Submission.get_by_id(int(id))
 		blog_title = blog_entry.blog_title
 		blog_body = blog_entry.blog_body
-	#	id_query = db.GqlQuery("SELECT * FROM Submission WHERE id = %s" % (id))
-	#	id_query = Submission.gql(WHERE id = id)
-	#    for record in id_query:
-	#		title = (record.blog_title())
-	#		self.response.write("<p>%s</p><p>%s</p>" % (record.blog_title, record.blog_body))
-	#		self.summon_post(blog_title, blog_body)
-	#	self.summon_post("Blog Title", "Blog Body")
-	#	self.response.write(id)
-	#	self.summon_post("Blog Title","Blog Body")
+
 		self.summon_post(blog_title, blog_body)
 
 
