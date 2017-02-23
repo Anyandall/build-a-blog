@@ -161,7 +161,7 @@ class NewPostHandler(MainHandler):
 			submission = Submission(blog_title = blog_title, blog_body = blog_body)
 			submission.put()
 
-			self.redirect("/blog")
+			self.redirect("/blog/%s" % submission.key().id())
 		elif has_title and not has_body:
 			self.write_newpost("", blog_title, "", "Submission has a title but no body!")
 		elif has_body and not has_title:
